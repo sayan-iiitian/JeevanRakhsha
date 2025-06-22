@@ -1,0 +1,171 @@
+/* Custom styles for Emergency Response System */
+
+body {
+    background-color: var(--bs-body-bg);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid var(--bs-border-color);
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Priority indicators */
+.priority-critical {
+    border-left: 4px solid #dc3545;
+}
+
+.priority-high {
+    border-left: 4px solid #fd7e14;
+}
+
+.priority-medium {
+    border-left: 4px solid #ffc107;
+}
+
+.priority-low {
+    border-left: 4px solid #198754;
+}
+
+/* Emergency type icons */
+.disaster-fire::before {
+    content: "🔥";
+    margin-right: 8px;
+}
+
+.disaster-flood::before {
+    content: "🌊";
+    margin-right: 8px;
+}
+
+.disaster-earthquake::before {
+    content: "🌍";
+    margin-right: 8px;
+}
+
+.disaster-accident::before {
+    content: "🚨";
+    margin-right: 8px;
+}
+
+.disaster-medical::before {
+    content: "🏥";
+    margin-right: 8px;
+}
+
+/* Loading animation */
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Status badges */
+.status-open {
+    background-color: #dc3545 !important;
+}
+
+.status-closed {
+    background-color: #198754 !important;
+}
+
+.status-in-progress {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .card-body {
+        padding: 1rem 0.75rem;
+    }
+    
+    .btn-lg {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+}
+
+/* Animation for new tickets */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ticket-card {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Emergency pulse animation for high priority */
+.priority-pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+/* Success message styling */
+.success-message {
+    border-left: 4px solid #198754;
+    background-color: rgba(25, 135, 84, 0.1);
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Error message styling */
+.error-message {
+    border-left: 4px solid #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+    padding: 1rem;
+    margin: 1rem 0;
+}

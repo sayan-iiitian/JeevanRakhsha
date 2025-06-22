@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Response Dashboard</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Emergency Response Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-plus me-1"></i>New SOS Report
+                </a>
+                <button class="btn btn-outline-success btn-sm ms-2" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-danger">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                        <h3 id="openTickets" class="text-danger">-</h3>
+                        <small>Open Emergencies</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <h3 id="closedTickets" class="text-success">-</h3>
+                        <small>Resolved</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-bar fa-2x text-info mb-2"></i>
+                        <h3 id="totalTickets" class="text-info">-</h3>
+                        <small>Total Reports</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-fire fa-2x text-warning mb-2"></i>
+                        <h6 id="topDisaster" class="text-warning">-</h6>
+                        <small>Most Common</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Tickets -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Active Emergency Reports
+                    <span class="badge bg-danger ms-2" id="activeCount">0</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="loadingSpinner" class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Loading emergency reports...</p>
+                </div>
+
+                <div id="noTicketsMessage" class="text-center py-4" style="display: none;">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5>No Active Emergencies</h5>
+                    <p class="text-muted">All emergency reports have been resolved.</p>
+                </div>
+
+                <div id="ticketsContainer" class="row"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Details Modal -->
+    <div class="modal fade" id="ticketModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-medical-alt me-2"></i>Emergency Report Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="closeTicketBtn">
+                        <i class="fas fa-check me-2"></i>Mark as Resolved
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentTicketId = null;
+        let tickets = [];
+
+        function refreshDashboard() {
+            loadStats();
+            loadTickets();
+        }
+
+        function loadStats() {
+            fetch('/ticket-stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('openTickets').textContent = data.open_tickets || 0;
+                    document.getElementById('closedTickets').textContent = data.closed_tickets || 0;
+                    document.getElementById('totalTickets').textContent = data.total_tickets || 0;
+                    
+                    if (data.disaster_types && data.disaster_types.length > 0) {
+                        document.getElementById('topDisaster').textContent = 
+                            data.disaster_types[0]._id.charAt(0).toUpperCase() + 
+                            data.disaster_types[0]._id.slice(1);
+                    } else {
+                        document.getElementById('topDisaster').textContent = 'None';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading stats:', error);
+                });
+        }
+
+        function loadTickets() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('noTicketsMessage').style.display = 'none';
+            document.getElementById('ticketsContainer').innerHTML = '';
+
+            fetch('/available-sos')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    
+                    if (data.tickets && data.tickets.length > 0) {
+                        tickets = data.tickets;
+                        document.getElementById('activeCount').textContent = tickets.length;
+                        displayTickets(tickets);
+                    } else {
+                        document.getElementById('noTicketsMessage').style.display = 'block';
+                        document.getElementById('activeCount').textContent = '0';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading tickets:', error);
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('ticketsContainer').innerHTML = 
+                        '<div class="alert alert-danger">Error loading emergency reports. Please try again.</div>';
+                });
+        }
+
+        function displayTickets(tickets) {
+            const container = document.getElementById('ticketsContainer');
+            container.innerHTML = '';
+
+            tickets.forEach(ticket => {
+                const priorityColor = getPriorityColor(ticket.priority_score);
+                const timeAgo = getTimeAgo(ticket.timestamp);
+                
+                const ticketCard = `
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-${priorityColor} h-100">
+                            <div class="card-header bg-${priorityColor} text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-fire me-1"></i>${ticket.disaster_type}
+                                    </h6>
+                                    <span class="badge bg-light text-dark">${ticket.priority_score}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                    <small>${ticket.location}</small>
+                                </p>
+                                <p class="card-text">${truncateText(ticket.text, 100)}</p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>${timeAgo}
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn btn-outline-primary btn-sm w-100" 
+                                        onclick="viewTicketDetails('${ticket.ticket_id}')">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += ticketCard;
+            });
+        }
+
+        function getPriorityColor(score) {
+            if (score >= 800) return 'danger';
+            if (score >= 600) return 'warning';
+            if (score >= 400) return 'info';
+            return 'secondary';
+        }
+
+        function truncateText(text, length) {
+            return text.length > length ? text.substring(0, length) + '...' : text;
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diffMs = now - time;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffMins > 0) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+            return 'Just now';
+        }
+
+        function viewTicketDetails(ticketId) {
+            const ticket = tickets.find(t => t.ticket_id === ticketId);
+            if (!ticket) return;
+
+            currentTicketId = ticketId;
+            const priorityColor = getPriorityColor(ticket.priority_score);
+            
+            document.getElementById('modalBody').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-map-marker-alt text-primary me-2"></i>Location</h6>
+                        <p class="mb-3">${ticket.location}</p>
+                        
+                        <h6><i class="fas fa-fire text-${priorityColor} me-2"></i>Disaster Type</h6>
+                        <p class="mb-3">${ticket.disaster_type}</p>
+                        
+                        <h6><i class="fas fa-exclamation-triangle text-warning me-2"></i>Priority Score</h6>
+                        <p class="mb-3">
+                            <span class="badge bg-${priorityColor} fs-6">${ticket.priority_score}/1000</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-clock text-info me-2"></i>Reported</h6>
+                        <p class="mb-3">${new Date(ticket.timestamp).toLocaleString()}</p>
+                        
+                        <h6><i class="fas fa-lightbulb text-success me-2"></i>Priority Reason</h6>
+                        <p class="mb-3">${ticket.priority_reason}</p>
+                    </div>
+                </div>
+                
+                <h6><i class="fas fa-edit text-primary me-2"></i>Emergency Description</h6>
+                <div class="alert alert-light">
+                    ${ticket.text}
+                </div>
+                
+                <h6><i class="fas fa-info-circle text-info me-2"></i>AI Analysis</h6>
+                <div class="alert alert-info">
+                    ${ticket.explanation}
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById('ticketModal')).show();
+        }
+
+        document.getElementById('closeTicketBtn').addEventListener('click', function() {
+            if (!currentTicketId) return;
+
+            if (confirm('Are you sure you want to mark this emergency as resolved?')) {
+                fetch(`/close-ticket/${currentTicketId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        bootstrap.Modal.getInstance(document.getElementById('ticketModal')).hide();
+                        refreshDashboard();
+                    } else {
+                        alert('Error closing ticket: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error closing ticket:', error);
+                    alert('Error closing ticket');
+                });
+            }
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshDashboard, 30000);
+
+        // Initial load
+        refreshDashboard();
+    </script>
+</body>
+</html>
