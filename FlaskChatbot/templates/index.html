@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency SOS System</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Emergency SOS System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-dashboard me-1"></i>Response Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h2 class="card-title mb-0">
+                            <i class="fas fa-sos me-2"></i>Emergency SOS Report
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please provide detailed information about your emergency situation. Our AI system will analyze and prioritize your report for immediate response.
+                        </div>
+
+                        <form id="sosForm">
+                            <div class="mb-4">
+                                <label for="location" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location
+                                </label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       placeholder="Enter your current location (address, landmarks, coordinates)" required>
+                                <div class="form-text">Be as specific as possible to help responders locate you quickly</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-edit me-2"></i>Emergency Description
+                                </label>
+                                <textarea class="form-control" id="description" name="description" rows="6" 
+                                          placeholder="Describe your emergency situation in detail..." required></textarea>
+                                <div class="form-text">Include what happened, current conditions, injuries, and immediate needs</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg" id="submitBtn">
+                                    <i class="fas fa-paper-plane me-2"></i>Submit Emergency Report
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="loadingAlert" class="alert alert-warning mt-3" style="display: none;">
+                            <i class="fas fa-spinner fa-spin me-2"></i>
+                            Processing your emergency report... Please wait.
+                        </div>
+
+                        <div id="successAlert" class="alert alert-success mt-3" style="display: none;">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span id="successMessage"></span>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger mt-3" style="display: none;">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span id="errorMessage"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card border-info">
+                            <div class="card-body text-center">
+                                <i class="fas fa-robot fa-2x text-info mb-2"></i>
+                                <h6>AI Analysis</h6>
+                                <small class="text-muted">Automatic disaster classification and priority assessment</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <i class="fas fa-clock fa-2x text-success mb-2"></i>
+                                <h6>Rapid Response</h6>
+                                <small class="text-muted">Immediate prioritization for emergency teams</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <i class="fas fa-shield-alt fa-2x text-primary mb-2"></i>
+                                <h6>24/7 Monitoring</h6>
+                                <small class="text-muted">Continuous emergency response coordination</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
