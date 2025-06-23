@@ -35,15 +35,16 @@ Before running this application, make sure you have:
 
 ### 1. Clone the Repository
 
-bash
+```bash
 git clone <your-repository-url>
 cd JeevanRakhsha
-
+```
 
 ### 2. Install Dependencies
 
-bash
+```bash
 npm install
+```
 
 
 This will install all required packages for both frontend and backend.
@@ -60,8 +61,9 @@ NODE_ENV=development
 
 ### 4. Start the Application
 
-bash
+```bash
 npm run dev
+```
 
 
 This command will:
