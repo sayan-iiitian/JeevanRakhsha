@@ -37,7 +37,7 @@ Before running this application, make sure you have:
 
 bash
 git clone <your-repository-url>
-cd disaster-help-rescue
+cd JeevanRakhsha
 
 
 ### 2. Install Dependencies
